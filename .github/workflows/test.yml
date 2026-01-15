@@ -22,9 +22,6 @@ jobs:
         with:
           version: nightly
 
-      - name: Install dependencies
-        run: forge install foundry-rs/forge-std --no-commit
-
       - name: Run Forge build
         run: forge build --sizes
 
