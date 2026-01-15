@@ -12,32 +12,55 @@ abstract contract SignatureAnalyzer is Test {
                         REPLAY DETECTION
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Check if a signature scheme is vulnerable to cross-chain replay
-    /// @param signedHash The hash that was signed
-    /// @param signature The signature bytes
-    /// @param expectedSigner The expected signer address
-    /// @return hasChainId Whether chain ID is included in the hash
+    /// @notice Check if a contract's signature verification includes chain ID
+    /// @dev Tests if the same signature works on different chains by calling the target's verify function
+    /// @param target Contract with signature verification
+    /// @param verifyCalldata Calldata to call the verification function
+    /// @param chainIds Array of chain IDs to test against
+    /// @return vulnerable True if signature works on multiple chains
     function checkCrossChainReplay(
-        bytes32 signedHash,
-        bytes memory signature,
-        address expectedSigner
-    ) internal returns (bool hasChainId) {
-        // Recover signer on current chain
-        address recovered1 = recoverSigner(signedHash, signature);
-
-        // Switch to different chain and try again
+        address target,
+        bytes memory verifyCalldata,
+        uint256[] memory chainIds
+    ) internal returns (bool vulnerable) {
         uint256 originalChain = block.chainid;
-        vm.chainId(originalChain == 1 ? 137 : 1);
+        uint256 successCount = 0;
 
-        address recovered2 = recoverSigner(signedHash, signature);
+        for (uint256 i = 0; i < chainIds.length; i++) {
+            vm.chainId(chainIds[i]);
+            (bool success,) = target.call(verifyCalldata);
+            if (success) {
+                successCount++;
+            }
+        }
 
         vm.chainId(originalChain); // Restore
 
-        // If signer recovers the same on both chains, chain ID not bound
-        hasChainId = (recovered1 != recovered2);
+        // If signature works on multiple chains, it's vulnerable
+        vulnerable = successCount > 1;
 
-        if (!hasChainId && recovered1 == expectedSigner) {
+        if (vulnerable) {
             emit log("VULNERABLE: Signature valid on multiple chains");
+            emit log_named_uint("Chains where signature is valid", successCount);
+        }
+    }
+
+    /// @notice Verify a signature includes chain ID by checking the hash structure
+    /// @dev Use this to manually verify a hash was computed with chainId
+    /// @param hash The hash to check
+    /// @param expectedChainId The chain ID that should be in the hash
+    /// @param signature The signature
+    /// @return signer The recovered signer address
+    function recoverAndVerifyChainId(
+        bytes32 hash,
+        uint256 expectedChainId,
+        bytes memory signature
+    ) internal view returns (address signer) {
+        signer = recoverSigner(hash, signature);
+        // Note: This just recovers - caller must verify the hash was built correctly
+        // with chainId. Consider using EIP-712 which enforces chainId in domain separator.
+        if (block.chainid != expectedChainId) {
+            emit log("WARNING: Current chain differs from expected chain in signature");
         }
     }
 

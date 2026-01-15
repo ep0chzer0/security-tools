@@ -96,10 +96,11 @@ contract OracleTestExample is OracleTestBase {
             // Should handle zero price gracefully
             (, bool valid) = oracle.getPrice();
             assertFalse(valid, "Zero price should be invalid");
-        } else if (price > type(uint128).max) {
-            // Should handle overflow
-            vm.expectRevert();
-            oracle.getPrice();
+        } else {
+            // Price was set successfully - verify it's readable
+            (uint256 readPrice, bool valid) = oracle.getPrice();
+            assertTrue(valid, "Price should be valid");
+            assertEq(readPrice, price, "Price should match");
         }
     }
 }
