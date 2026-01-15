@@ -79,11 +79,11 @@ abstract contract FlashLoanTestBase is Test {
     }
 
     /// @notice Test sandwich attack profitability
-    /// @param victimTx The victim's pending transaction data
     /// @param pool The pool being traded on
+    /// @param victimAmount The victim's swap amount (for simulation)
     function testSandwichAttack(
-        bytes memory victimTx,
-        address pool
+        address pool,
+        uint256 victimAmount
     ) internal returns (uint256 profit) {
         uint256 balanceBefore = address(this).balance;
 
@@ -91,7 +91,8 @@ abstract contract FlashLoanTestBase is Test {
         _executeFrontrun(pool);
 
         // Victim transaction executes (simulated)
-        // In real scenario, this happens in the same block
+        // Override _simulateVictimTx to implement victim's swap
+        _simulateVictimTx(pool, victimAmount);
 
         // Back-run: sell after victim
         _executeBackrun(pool);
@@ -99,6 +100,9 @@ abstract contract FlashLoanTestBase is Test {
         uint256 balanceAfter = address(this).balance;
         profit = balanceAfter > balanceBefore ? balanceAfter - balanceBefore : 0;
     }
+
+    /// @notice Override to simulate victim's transaction
+    function _simulateVictimTx(address pool, uint256 amount) internal virtual {}
 
     /*//////////////////////////////////////////////////////////////
                          LIQUIDATION ATTACKS

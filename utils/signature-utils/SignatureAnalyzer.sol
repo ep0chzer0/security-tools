@@ -51,17 +51,17 @@ abstract contract SignatureAnalyzer is Test {
     /// @param expectedChainId The chain ID that should be in the hash
     /// @param signature The signature
     /// @return signer The recovered signer address
+    /// @notice Recover signer and check if current chain matches expected
+    /// @dev Returns signer and whether chain matches. Caller must verify hash includes chainId.
     function recoverAndVerifyChainId(
         bytes32 hash,
         uint256 expectedChainId,
         bytes memory signature
-    ) internal view returns (address signer) {
+    ) internal view returns (address signer, bool chainMatches) {
         signer = recoverSigner(hash, signature);
+        chainMatches = (block.chainid == expectedChainId);
         // Note: This just recovers - caller must verify the hash was built correctly
         // with chainId. Consider using EIP-712 which enforces chainId in domain separator.
-        if (block.chainid != expectedChainId) {
-            emit log("WARNING: Current chain differs from expected chain in signature");
-        }
     }
 
     /// @notice Test nonce replay protection

@@ -32,21 +32,22 @@ abstract contract AccessControlTestBase is Test {
         address authorizedUser,
         address unauthorizedUser
     ) internal returns (bool properlyProtected) {
-        // Test unauthorized user (should fail)
+        // Test unauthorized user (should revert/fail)
         vm.prank(unauthorizedUser);
-        (bool shouldFail,) = target.call(calldata_);
+        (bool unauthorizedSucceeded,) = target.call(calldata_);
 
         // Test authorized user (should succeed)
         vm.prank(authorizedUser);
-        (bool shouldSucceed,) = target.call(calldata_);
+        (bool authorizedSucceeded,) = target.call(calldata_);
 
-        properlyProtected = !shouldFail && shouldSucceed;
+        // Properly protected if: unauthorized fails AND authorized succeeds
+        properlyProtected = !unauthorizedSucceeded && authorizedSucceeded;
 
         if (!properlyProtected) {
-            if (shouldFail) {
+            if (unauthorizedSucceeded) {
                 emit log("VULNERABLE: Unauthorized user could call protected function");
             }
-            if (!shouldSucceed) {
+            if (!authorizedSucceeded) {
                 emit log("WARNING: Authorized user could not call function");
             }
         }

