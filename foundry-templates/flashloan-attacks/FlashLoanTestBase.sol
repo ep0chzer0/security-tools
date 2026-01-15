@@ -7,7 +7,6 @@ import {Test} from "forge-std/Test.sol";
 /// @author ep0chzer0
 /// @notice Base contract for testing flash loan attack vectors
 abstract contract FlashLoanTestBase is Test {
-
     /*//////////////////////////////////////////////////////////////
                             FLASH LOAN PROVIDERS
     //////////////////////////////////////////////////////////////*/
@@ -24,7 +23,10 @@ abstract contract FlashLoanTestBase is Test {
     /// @notice Simulate having a large token balance (like a flash loan)
     /// @param token The token to simulate borrowing
     /// @param amount The amount to borrow
-    function simulateFlashLoan(address token, uint256 amount) internal {
+    function simulateFlashLoan(
+        address token,
+        uint256 amount
+    ) internal {
         deal(token, address(this), amount);
     }
 
@@ -102,7 +104,10 @@ abstract contract FlashLoanTestBase is Test {
     }
 
     /// @notice Override to simulate victim's transaction
-    function _simulateVictimTx(address pool, uint256 amount) internal virtual {}
+    function _simulateVictimTx(
+        address pool,
+        uint256 amount
+    ) internal virtual {}
 
     /*//////////////////////////////////////////////////////////////
                          LIQUIDATION ATTACKS
@@ -164,18 +169,30 @@ abstract contract FlashLoanTestBase is Test {
                            INTERNAL HELPERS
     //////////////////////////////////////////////////////////////*/
 
-    function _getBalance(address token, address account) internal view returns (uint256) {
-        (bool success, bytes memory data) = token.staticcall(
-            abi.encodeWithSignature("balanceOf(address)", account)
-        );
+    function _getBalance(
+        address token,
+        address account
+    ) internal view returns (uint256) {
+        (bool success, bytes memory data) =
+            token.staticcall(abi.encodeWithSignature("balanceOf(address)", account));
         return success ? abi.decode(data, (uint256)) : 0;
     }
 
     // Override these in your specific test implementations
-    function _getOraclePrice(address oracle) internal view virtual returns (uint256);
-    function _manipulatePool(address pool, address token, uint256 amount) internal virtual;
-    function _executeFrontrun(address pool) internal virtual;
-    function _executeBackrun(address pool) internal virtual;
+    function _getOraclePrice(
+        address oracle
+    ) internal view virtual returns (uint256);
+    function _manipulatePool(
+        address pool,
+        address token,
+        uint256 amount
+    ) internal virtual;
+    function _executeFrontrun(
+        address pool
+    ) internal virtual;
+    function _executeBackrun(
+        address pool
+    ) internal virtual;
     function _executeLiquidation(
         address protocol,
         address user,
@@ -183,7 +200,17 @@ abstract contract FlashLoanTestBase is Test {
         address collateralToken,
         uint256 amount
     ) internal virtual;
-    function _delegateVotes(address token, address delegatee) internal virtual;
-    function _castVote(address governor, uint256 proposalId, bool support) internal virtual;
-    function _isProposalPassing(address governor, uint256 proposalId) internal view virtual returns (bool);
+    function _delegateVotes(
+        address token,
+        address delegatee
+    ) internal virtual;
+    function _castVote(
+        address governor,
+        uint256 proposalId,
+        bool support
+    ) internal virtual;
+    function _isProposalPassing(
+        address governor,
+        uint256 proposalId
+    ) internal view virtual returns (bool);
 }

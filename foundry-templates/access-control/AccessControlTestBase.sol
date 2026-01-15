@@ -7,7 +7,6 @@ import {Test} from "forge-std/Test.sol";
 /// @author ep0chzer0
 /// @notice Base contract for testing access control vulnerabilities
 abstract contract AccessControlTestBase is Test {
-
     /*//////////////////////////////////////////////////////////////
                            COMMON ROLES
     //////////////////////////////////////////////////////////////*/
@@ -91,9 +90,8 @@ abstract contract AccessControlTestBase is Test {
     ) internal returns (bool secure) {
         // Try direct ownership transfer by non-owner
         vm.prank(newOwner);
-        (bool directTransfer,) = target.call(
-            abi.encodeWithSignature("transferOwnership(address)", newOwner)
-        );
+        (bool directTransfer,) =
+            target.call(abi.encodeWithSignature("transferOwnership(address)", newOwner));
 
         // If direct transfer worked for non-owner, it's vulnerable
         if (directTransfer) {
@@ -103,14 +101,12 @@ abstract contract AccessControlTestBase is Test {
 
         // Proper two-step: owner initiates, new owner accepts
         vm.prank(currentOwner);
-        (bool initiate,) = target.call(
-            abi.encodeWithSignature("transferOwnership(address)", newOwner)
-        );
+        (bool initiate,) =
+            target.call(abi.encodeWithSignature("transferOwnership(address)", newOwner));
 
         // Check if pending owner is set (two-step) or immediate (one-step)
-        (bool hasPending, bytes memory pendingData) = target.staticcall(
-            abi.encodeWithSignature("pendingOwner()")
-        );
+        (bool hasPending, bytes memory pendingData) =
+            target.staticcall(abi.encodeWithSignature("pendingOwner()"));
 
         secure = hasPending && abi.decode(pendingData, (address)) == newOwner;
 
@@ -125,9 +121,7 @@ abstract contract AccessControlTestBase is Test {
         address owner
     ) internal returns (bool canRenounce) {
         vm.prank(owner);
-        (canRenounce,) = target.call(
-            abi.encodeWithSignature("renounceOwnership()")
-        );
+        (canRenounce,) = target.call(abi.encodeWithSignature("renounceOwnership()"));
 
         if (canRenounce) {
             emit log("WARNING: Ownership can be renounced - verify this is intentional");
@@ -179,9 +173,8 @@ abstract contract AccessControlTestBase is Test {
         address attacker
     ) internal returns (bool vulnerable) {
         vm.prank(attacker);
-        (vulnerable,) = target.call(
-            abi.encodeWithSignature("grantRole(bytes32,address)", role, attacker)
-        );
+        (vulnerable,) =
+            target.call(abi.encodeWithSignature("grantRole(bytes32,address)", role, attacker));
 
         if (vulnerable) {
             emit log("VULNERABLE: Users can grant roles to themselves");
@@ -210,9 +203,9 @@ abstract contract AccessControlTestBase is Test {
     /// @notice Generate array of common test addresses
     function _getTestAddresses() internal pure returns (address[] memory) {
         address[] memory addrs = new address[](5);
-        addrs[0] = address(0);                    // Zero address
-        addrs[1] = address(1);                    // Precompile range
-        addrs[2] = address(0xdead);               // Common burn address
+        addrs[0] = address(0); // Zero address
+        addrs[1] = address(1); // Precompile range
+        addrs[2] = address(0xdead); // Common burn address
         addrs[3] = address(uint160(uint256(keccak256("attacker"))));
         addrs[4] = address(uint160(uint256(keccak256("random"))));
         return addrs;

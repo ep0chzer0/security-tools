@@ -23,9 +23,17 @@ interface IPool {
 }
 
 interface IERC20 {
-    function balanceOf(address) external view returns (uint256);
-    function approve(address, uint256) external returns (bool);
-    function transfer(address, uint256) external returns (bool);
+    function balanceOf(
+        address
+    ) external view returns (uint256);
+    function approve(
+        address,
+        uint256
+    ) external returns (bool);
+    function transfer(
+        address,
+        uint256
+    ) external returns (bool);
 }
 
 abstract contract AaveFlashLoanTemplate is Test {
@@ -49,18 +57,22 @@ abstract contract AaveFlashLoanTemplate is Test {
     /// @notice Execute a flash loan attack
     /// @param token Token to borrow
     /// @param amount Amount to borrow
-    function _executeFlashLoan(address token, uint256 amount) internal {
+    function _executeFlashLoan(
+        address token,
+        uint256 amount
+    ) internal {
         _flashLoanToken = token;
         _flashLoanAmount = amount;
         _inFlashLoan = true;
 
-        IPool(AAVE_POOL).flashLoanSimple(
-            address(this),
-            token,
-            amount,
-            "", // params - passed to executeOperation
-            0   // referralCode
-        );
+        IPool(AAVE_POOL)
+            .flashLoanSimple(
+                address(this),
+                token,
+                amount,
+                "", // params - passed to executeOperation
+                0 // referralCode
+            );
 
         _inFlashLoan = false;
     }
@@ -104,7 +116,9 @@ abstract contract AaveFlashLoanTemplate is Test {
     /// @notice Calculate required profit to cover flash loan fee
     /// @param amount The borrowed amount
     /// @return minProfit Minimum profit needed (Aave fee is 0.05%)
-    function _minProfitRequired(uint256 amount) internal pure returns (uint256) {
+    function _minProfitRequired(
+        uint256 amount
+    ) internal pure returns (uint256) {
         return (amount * 5) / 10000; // 0.05% fee
     }
 

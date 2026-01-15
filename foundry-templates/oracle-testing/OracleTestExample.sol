@@ -7,7 +7,6 @@ import {OracleTestBase} from "./OracleTestBase.sol";
 /// @author ep0chzer0
 /// @notice Example showing how to use OracleTestBase
 contract OracleTestExample is OracleTestBase {
-
     // Mock oracle for demonstration
     MockOracle oracle;
 
@@ -68,14 +67,16 @@ contract OracleTestExample is OracleTestBase {
 
     function test_CrossChainReplay() public {
         uint256[] memory chains = new uint256[](3);
-        chains[0] = 1;      // Ethereum
-        chains[1] = 42161;  // Arbitrum
-        chains[2] = 137;    // Polygon
+        chains[0] = 1; // Ethereum
+        chains[1] = 42161; // Arbitrum
+        chains[2] = 137; // Polygon
 
         testCrossChainReplay(chains);
     }
 
-    function _onChainSwitch(uint256 chainId) internal override {
+    function _onChainSwitch(
+        uint256 chainId
+    ) internal override {
         // Verify oracle data isn't replayed across chains
         assertEq(block.chainid, chainId);
         // Add chain-specific validation here
@@ -89,7 +90,9 @@ contract OracleTestExample is OracleTestBase {
         testPriceExtremes(1000e8);
     }
 
-    function _onPriceUpdate(uint256 price) internal override {
+    function _onPriceUpdate(
+        uint256 price
+    ) internal override {
         oracle.setPrice(price);
 
         if (price == 0) {
@@ -111,7 +114,9 @@ contract MockOracle {
     uint256 public lastUpdate;
     uint256 public constant STALENESS_THRESHOLD = 1 hours;
 
-    function setPrice(uint256 _price) external {
+    function setPrice(
+        uint256 _price
+    ) external {
         price = _price;
         lastUpdate = block.timestamp;
     }

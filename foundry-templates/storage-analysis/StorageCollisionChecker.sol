@@ -7,50 +7,71 @@ import {Test} from "forge-std/Test.sol";
 /// @author ep0chzer0
 /// @notice Utilities for detecting storage collisions in upgradeable contracts
 abstract contract StorageCollisionChecker is Test {
-
     /*//////////////////////////////////////////////////////////////
                          EIP-1967 SLOTS
     //////////////////////////////////////////////////////////////*/
 
     // EIP-1967 standard slots
-    bytes32 constant IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
-    bytes32 constant ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
-    bytes32 constant BEACON_SLOT = 0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50;
+    bytes32 constant IMPLEMENTATION_SLOT =
+        0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+    bytes32 constant ADMIN_SLOT =
+        0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
+    bytes32 constant BEACON_SLOT =
+        0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50;
 
     // OpenZeppelin Initializable slot
-    bytes32 constant INITIALIZABLE_SLOT = 0xf0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00;
+    bytes32 constant INITIALIZABLE_SLOT =
+        0xf0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00;
 
     /*//////////////////////////////////////////////////////////////
                        STORAGE LAYOUT ANALYSIS
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Read storage at a specific slot
-    function readSlot(address target, bytes32 slot) internal view returns (bytes32) {
+    function readSlot(
+        address target,
+        bytes32 slot
+    ) internal view returns (bytes32) {
         return vm.load(target, slot);
     }
 
     /// @notice Read storage at a specific slot as address
-    function readSlotAsAddress(address target, bytes32 slot) internal view returns (address) {
+    function readSlotAsAddress(
+        address target,
+        bytes32 slot
+    ) internal view returns (address) {
         return address(uint160(uint256(vm.load(target, slot))));
     }
 
     /// @notice Read storage at a specific slot as uint256
-    function readSlotAsUint(address target, bytes32 slot) internal view returns (uint256) {
+    function readSlotAsUint(
+        address target,
+        bytes32 slot
+    ) internal view returns (uint256) {
         return uint256(vm.load(target, slot));
     }
 
     /// @notice Calculate mapping slot for a given key
-    function getMappingSlot(bytes32 baseSlot, address key) internal pure returns (bytes32) {
+    function getMappingSlot(
+        bytes32 baseSlot,
+        address key
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encode(key, baseSlot));
     }
 
     /// @notice Calculate mapping slot for uint key
-    function getMappingSlot(bytes32 baseSlot, uint256 key) internal pure returns (bytes32) {
+    function getMappingSlot(
+        bytes32 baseSlot,
+        uint256 key
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encode(key, baseSlot));
     }
 
     /// @notice Calculate dynamic array element slot
-    function getArraySlot(bytes32 baseSlot, uint256 index) internal pure returns (bytes32) {
+    function getArraySlot(
+        bytes32 baseSlot,
+        uint256 index
+    ) internal pure returns (bytes32) {
         return bytes32(uint256(keccak256(abi.encode(baseSlot))) + index);
     }
 
@@ -95,7 +116,9 @@ abstract contract StorageCollisionChecker is Test {
     }
 
     /// @notice Verify EIP-1967 slots are not overwritten
-    function checkEIP1967Slots(address proxy) internal view returns (bool safe) {
+    function checkEIP1967Slots(
+        address proxy
+    ) internal view returns (bool safe) {
         // These slots should only contain addresses or be empty
         bytes32 implValue = readSlot(proxy, IMPLEMENTATION_SLOT);
         bytes32 adminValue = readSlot(proxy, ADMIN_SLOT);
@@ -110,7 +133,9 @@ abstract contract StorageCollisionChecker is Test {
     }
 
     /// @notice Check for uninitialized proxy vulnerability
-    function checkUninitializedProxy(address proxy) internal view returns (bool vulnerable) {
+    function checkUninitializedProxy(
+        address proxy
+    ) internal view returns (bool vulnerable) {
         address impl = readSlotAsAddress(proxy, IMPLEMENTATION_SLOT);
 
         // If implementation is zero, proxy is uninitialized

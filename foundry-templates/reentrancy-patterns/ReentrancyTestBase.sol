@@ -7,7 +7,6 @@ import {Test} from "forge-std/Test.sol";
 /// @author ep0chzer0
 /// @notice Base contract for testing reentrancy vulnerabilities
 abstract contract ReentrancyTestBase is Test {
-
     /*//////////////////////////////////////////////////////////////
                            ATTACK CONTRACTS
     //////////////////////////////////////////////////////////////*/
@@ -117,7 +116,10 @@ contract SingleReentrant {
     uint256 public attackCount;
     uint256 public maxAttacks = 10;
 
-    constructor(address _target, bytes memory _calldata) {
+    constructor(
+        address _target,
+        bytes memory _calldata
+    ) {
         target = _target;
         attackCalldata = _calldata;
     }
@@ -144,7 +146,11 @@ contract CrossReentrant {
     bytes public reentrantCalldata;
     bool public inAttack;
 
-    constructor(address _target, bytes memory _initial, bytes memory _reentrant) {
+    constructor(
+        address _target,
+        bytes memory _initial,
+        bytes memory _reentrant
+    ) {
         target = _target;
         initialCalldata = _initial;
         reentrantCalldata = _reentrant;
@@ -171,12 +177,17 @@ contract ReadOnlyReentrant {
     bytes public viewCalldata;
     bytes public capturedValue;
 
-    constructor(address _target, bytes memory _viewCalldata) {
+    constructor(
+        address _target,
+        bytes memory _viewCalldata
+    ) {
         target = _target;
         viewCalldata = _viewCalldata;
     }
 
-    function attack(bytes calldata triggerCalldata) external {
+    function attack(
+        bytes calldata triggerCalldata
+    ) external {
         (bool success,) = target.call(triggerCalldata);
         require(success, "Trigger failed");
     }
