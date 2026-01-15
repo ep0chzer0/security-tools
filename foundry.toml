@@ -1,0 +1,10 @@
+[profile.default]
+src = "foundry-templates"
+out = "out"
+libs = ["lib"]
+solc = "0.8.19"
+
+[profile.default.fmt]
+line_length = 100
+tab_width = 4
+bracket_spacing = false
