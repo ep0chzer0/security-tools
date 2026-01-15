@@ -131,7 +131,8 @@ contract SingleReentrant {
         if (attackCount < maxAttacks && target.balance > 0) {
             attackCount++;
             // Don't require success - may run out of funds
-            target.call(attackCalldata);
+            (bool success,) = target.call(attackCalldata);
+            success; // Silence unused variable warning
         }
     }
 }
